@@ -11,5 +11,5 @@ Todas as variáveis devem que ser escritas:
 
 **b)** Usando camelCase
 
-**c)** Com nomes descritivos. Lembre-se, não sabemos o que significa `int scr_w`
+**c)** Com nomes descritivos. Lembre-se, não sabemos o que significa `float scr_w`
 
