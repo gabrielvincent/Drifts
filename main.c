@@ -55,36 +55,43 @@ SDL_Rect SDL_RectMake(Sint16 x, Sint16 y, Uint16 w, Uint16 h) {
 	return rect;
 }
 
-// int surfaceDidHitWallAtAxis(SDL_Surface *surface, int axis) {
+int surfaceWithFrameDidHitWallAtAxis(SDL_Rect *frame, int axis) {
 
-// 	switch (axis) {
+	Sint16 x = frame->x;
+	Sint16 y = frame->y;
 
-// 		case X_AXIS:
-// 			ball->horizontalVelocity = -ball->horizontalVelocity;
-// 			break;
+	Uint16 w = frame->w;
+	Uint16 h = frame->h;
 
-// 		case Y_AXIS:
-// 			ball->verticallVelocity = -ball->verticallVelocity;
-// 			break;
-// 	}
-// }
+	printf("x: %d | y: %d | w: %d | h:%d\n", x, y, w, h);
+
+	switch (axis) {
+
+		case X_AXIS:
+			return (x >= SCREEN_WIDTH - w);
+
+		case Y_AXIS:
+			return (y >= SCREEN_HEIGHT - h);
+
+		default:
+			return 0;
+	}
+}
 
 void moveCursor(Ball *cursor, SDL_Surface *screen) {
 
 	Sint16 *x = &cursor->frame.x;
 	Sint16 *y = &cursor->frame.y;
 
-	Uint8 cursorWidth = cursor->frame.w;
-	Uint8 cursorHeight = cursor->frame.h;
+	Uint16 cursorWidth = cursor->frame.w;
+	Uint16 cursorHeight = cursor->frame.h;
 
 	SDL_GetMouseState((int *)x, (int *)y);
 
-	if (*x >= SCREEN_WIDTH - cursorWidth)
+	if (surfaceWithFrameDidHitWallAtAxis(&cursor->frame, X_AXIS))
 		*x = SCREEN_WIDTH - cursorWidth;
-	if (*y >= SCREEN_HEIGHT - cursorHeight)
+	if (surfaceWithFrameDidHitWallAtAxis(&cursor->frame, Y_AXIS))
 		*y = SCREEN_HEIGHT - cursorHeight;
-
-	printf("W: %d | H: %d\n", cursorWidth, cursorHeight);
 
 	SDL_BlitSurface(cursor->image, NULL, screen, &cursor->frame);
 }
