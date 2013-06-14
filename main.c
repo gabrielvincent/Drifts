@@ -71,13 +71,20 @@ SDL_Rect SDL_RectMake(Sint16 x, Sint16 y, Uint16 w, Uint16 h) {
 
 void moveCursor(Ball *cursor, SDL_Surface *screen) {
 
-	int *x = (int *)&cursor->frame.x;
-	int *y = (int *)&cursor->frame.y;
+	Sint16 *x = &cursor->frame.x;
+	Sint16 *y = &cursor->frame.y;
 
+	Uint8 cursorWidth = cursor->frame.w;
+	Uint8 cursorHeight = cursor->frame.h;
 
-	SDL_PumpEvents();
-	SDL_GetMouseState(x, y);
-	printf("X: %d | Y: %d\n", *x, *y);
+	SDL_GetMouseState((int *)x, (int *)y);
+
+	if (*x >= SCREEN_WIDTH - cursorWidth)
+		*x = SCREEN_WIDTH - cursorWidth;
+	if (*y >= SCREEN_HEIGHT - cursorHeight)
+		*y = SCREEN_HEIGHT - cursorHeight;
+
+	printf("W: %d | H: %d\n", cursorWidth, cursorHeight);
 
 	SDL_BlitSurface(cursor->image, NULL, screen, &cursor->frame);
 }
