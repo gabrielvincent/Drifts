@@ -63,8 +63,6 @@ int surfaceWithFrameDidHitWallAtAxis(SDL_Rect *frame, int axis) {
 	Uint16 w = frame->w;
 	Uint16 h = frame->h;
 
-	printf("x: %d | y: %d | w: %d | h:%d\n", x, y, w, h);
-
 	switch (axis) {
 
 		case X_AXIS:
@@ -87,6 +85,9 @@ void moveCursor(Ball *cursor, SDL_Surface *screen) {
 	Uint16 cursorHeight = cursor->frame.h;
 
 	SDL_GetMouseState((int *)x, (int *)y);
+
+	cursor->frame.w = cursorWidth;
+	cursor->frame.h = cursorHeight;
 
 	if (surfaceWithFrameDidHitWallAtAxis(&cursor->frame, X_AXIS))
 		*x = SCREEN_WIDTH - cursorWidth;
