@@ -17,9 +17,9 @@ typedef struct {
 	SDL_Surface *image;
 	SDL_Rect frame;
 	float horizontalVelocity, verticallVelocity;
-} Ball;
+} Cursor;
 
-void changeDirection(Ball *ball, int axis) {
+void changeDirection(Cursor *ball, int axis) {
 
 	switch (axis) {
 
@@ -33,7 +33,7 @@ void changeDirection(Ball *ball, int axis) {
 	}
 }
 
-void move(Ball *ball) {
+void move(Cursor *ball) {
 
 	ball->frame.x += ball->horizontalVelocity;
 	ball->frame.y += ball->verticallVelocity;
@@ -76,7 +76,7 @@ int surfaceWithFrameDidHitWallAtAxis(SDL_Rect *frame, int axis) {
 	}
 }
 
-void moveCursor(Ball *cursor, SDL_Surface *screen) {
+void moveCursor(Cursor *cursor, SDL_Surface *screen) {
 
 	Sint16 *x = &cursor->frame.x;
 	Sint16 *y = &cursor->frame.y;
@@ -104,7 +104,7 @@ int main (int argc, char **argv) {
 	Uint32 backgroundColour;
 	int quit = 0;
 
-	Ball cursor;
+	Cursor cursor;
 
 	if(SDL_Init(SDL_INIT_VIDEO) == -1) {
 	    puts(SDL_GetError());
@@ -117,7 +117,7 @@ int main (int argc, char **argv) {
 
 	cursor.frame = SDL_RectMake(0, 0, 40, 40);
 	if (!(cursor.image = IMG_Load(COLLECTIBLE_BALL_FILENAME))) {
-		printf("Could not load image %s\nSDL ERROR %s\n", COLLECTIBLE_BALL_FILENAME, SDL_GetError());
+		printf("SDL ERROR: %s\n", SDL_GetError());
 		exit(1);
 	}
 
