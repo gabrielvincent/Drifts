@@ -17,9 +17,14 @@ typedef struct {
 	SDL_Surface *image;
 	SDL_Rect frame;
 	float horizontalVelocity, verticallVelocity;
+} Ball;
+
+typedef struct {
+	SDL_Surface *image;
+	SDL_Rect frame;
 } Cursor;
 
-void changeDirection(Cursor *ball, int axis) {
+void changeDirection(Ball *ball, int axis) {
 
 	switch (axis) {
 
@@ -33,7 +38,7 @@ void changeDirection(Cursor *ball, int axis) {
 	}
 }
 
-void move(Cursor *ball) {
+void moveBall(Ball *ball) {
 
 	ball->frame.x += ball->horizontalVelocity;
 	ball->frame.y += ball->verticallVelocity;
@@ -42,6 +47,16 @@ void move(Cursor *ball) {
 		changeDirection(ball, X_AXIS);
 	if (ball->frame.y >= (SCREEN_HEIGHT - ball->frame.h) || ball->frame.y <= 0)
 		changeDirection(ball, Y_AXIS);
+}
+
+SDL_Color SDL_ColorMake(Uint8 red, Uint8 green, Uint8 blue) {
+
+	SDL_Color colour;
+	colour.r = red;
+	colour.g = green;
+	colour.b = blue;
+
+	return colour;
 }
 
 SDL_Rect SDL_RectMake(Sint16 x, Sint16 y, Uint16 w, Uint16 h) {
@@ -84,7 +99,7 @@ void moveCursor(Cursor *cursor, SDL_Surface *screen) {
 	Uint16 cursorWidth = cursor->frame.w;
 	Uint16 cursorHeight = cursor->frame.h;
 
-	SDL_GetMouseState((int *)x, (int *)y);
+	SDL_GetMouseState((int *)x, (int *)y); 
 
 	cursor->frame.w = cursorWidth;
 	cursor->frame.h = cursorHeight;
@@ -108,7 +123,7 @@ int main (int argc, char **argv) {
 
 	if(SDL_Init(SDL_INIT_VIDEO) == -1) {
 	    puts(SDL_GetError());
-	    return 1;
+	    exit(1);
 	}
 
 	screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 16, SDL_SWSURFACE);
