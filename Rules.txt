@@ -1,0 +1,7 @@
+Regras do jogo
+
+Uma bola principal, controlada pelo cursor do usuário, deve capturar outras bolas, que vagam pela tela. A captura acontece quando o cursor encosta em uma bola. Essa bola, então, prende-se ao cursor e passa a ter o poder de capturar novas bolas, repetindo esse comportamento tanto quanto se queira.
+Ao enconstar em uma bola azul, todas as bolas capturadas somem e ganha-se uma quantidade de pontos proporcional à quantidade de bolas que sumiu.
+Ao enconstar em uma bola vermelha, todas as bolas capturadas somem e, além de não ganhar-se nenhum ponto, perde-se uma vida.
+Ao final de três vidas, acaba o jogo.
+As bolas a serem capturadas aparecem na tela com frequência, direção e velocidade aleatórias.

@@ -6,8 +6,6 @@
 #define X_AXIS 0
 #define Y_AXIS 1
 
-#define MAX_BALLS 200
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL/SDL.h>
@@ -113,6 +111,8 @@ void moveCursor(Cursor *cursor, SDL_Surface *screen) {
 }
 
 int main (int argc, char **argv) {
+
+	srand(time(NULL));
 
 	SDL_Surface *screen;
 	SDL_Event event;
