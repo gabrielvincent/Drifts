@@ -1,16 +1,29 @@
 #define COLLECTIBLE_BALL_FILENAME "CollectibleBall.png"
 
-#define SCREEN_WIDTH 640
+#define MAXIMUM_BALLS 100
+
+#define SCREEN_WIDTH  640
 #define SCREEN_HEIGHT 480
 
 #define X_AXIS 0
 #define Y_AXIS 1
+
+#define NO  0
+#define YES 1
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
+
+#pragma mark - Prototypes
+
+SDL_Rect SDL_RectMake(Sint16 x, Sint16 y, Uint16 w, Uint16 h);
+
+#pragma mark - Typedefs
+
+typedef char BOOL;
 
 typedef struct {
 	SDL_Surface *surface;
@@ -21,12 +34,38 @@ typedef struct {
 	SDL_Surface *image;
 	SDL_Rect frame;
 	float horizontalVelocity, verticallVelocity;
+	BOOL visible;
 } Ball;
 
 typedef struct {
 	SDL_Surface *image;
 	SDL_Rect frame;
 } Cursor;
+
+#pragma mark - Setups
+
+void setupCollectibleBalls(Ball *collectibleBalls) {
+
+	int i;
+
+	if (!((collectibleBalls[0]).image = IMG_Load(COLLECTIBLE_BALL_FILENAME))) {
+		printf("SDL ERROR: %s\n", SDL_GetError());
+		exit(1);
+	}
+
+	(collectibleBalls[0]).frame = SDL_RectMake(0, 0, 40, 40);
+	(collectibleBalls[0]).horizontalVelocity = 0;
+	(collectibleBalls[0]).verticallVelocity = 0;
+	(collectibleBalls[0]).visible = NO;
+
+	for (i = 0; i < MAXIMUM_BALLS; i++) {
+
+		printf("Setting up\n");
+	}
+
+}
+
+#pragma mark - Implementation
 
 void changeDirection(Ball *ball, int axis) {
 
@@ -116,6 +155,10 @@ void moveCursor(Cursor *cursor, SDL_Surface *bufferSurface) {
 	SDL_BlitSurface(cursor->image, NULL, bufferSurface, &cursor->frame);
 }
 
+void dispatchBalls(Ball *collectibleBalls) {
+
+}
+
 int main (int argc, char **argv) {
 
 	srand(time(NULL));
@@ -127,6 +170,8 @@ int main (int argc, char **argv) {
 	int quit = 0;
 
 	Cursor cursor;
+
+	Ball collectibleBalls[MAXIMUM_BALLS];
 
 	if(SDL_Init(SDL_INIT_VIDEO) == -1) {
 	    puts(SDL_GetError());
@@ -146,6 +191,8 @@ int main (int argc, char **argv) {
 		exit(1);
 	}
 
+	setupCollectibleBalls(collectibleBalls);
+
   while(!quit) {
 		while(SDL_PollEvent(&event)) {
 			if(event.type == SDL_QUIT)
@@ -155,9 +202,12 @@ int main (int argc, char **argv) {
 		SDL_FillRect(bufferSurface.surface, NULL, backgroundColour);
 		SDL_FillRect(screen, NULL, backgroundColour);
 
+		SDL_BlitSurface(((collectibleBalls[0]).image), NULL, bufferSurface.surface, &((collectibleBalls[0]).frame));
+
+		dispatchBalls(collectibleBalls);
 		moveCursor(&cursor, bufferSurface.surface);
 
-		SDL_BlitSurface(bufferSurface.surface, NULL, screen, &bufferSurface.frame);
+		SDL_BlitSurface(bufferSurface.surface, NULL, screen, &bufferSurface.frame); // Commits all previous blits with a single blit to the screen
 		SDL_Flip(screen);
 	}
 
