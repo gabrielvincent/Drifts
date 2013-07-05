@@ -1,4 +1,5 @@
 #define COLLECTIBLE_BALL_FILENAME "CollectibleBall.png"
+#define CURSOR_FILENAME "Cursor.png"
 
 #define MAXIMUM_BALLS 100
 
@@ -60,7 +61,6 @@ void setupCollectibleBalls(Ball *collectibleBalls) {
 		(collectibleBalls[i]).verticallVelocity = 0;
 		(collectibleBalls[i]).visible = NO;
 	}
-
 }
 
 #pragma mark - Implementation
@@ -175,7 +175,7 @@ int main (int argc, char **argv) {
 	    puts(SDL_GetError());
 	    exit(1);
 	}
-
+    
 	screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 16, SDL_SWSURFACE);
 	backgroundColour = SDL_MapRGB(screen->format, 255, 255, 255); // White colour
 	SDL_ShowCursor(SDL_DISABLE);
@@ -183,8 +183,10 @@ int main (int argc, char **argv) {
 	bufferSurface.surface = screen;
 	bufferSurface.frame = SDL_RectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
+	setupCollectibleBalls(collectibleBalls);
+
 	cursor.frame = SDL_RectMake(0, 0, 40, 40);
-	if (!(cursor.image = IMG_Load(COLLECTIBLE_BALL_FILENAME))) {
+	if (!(cursor.image = IMG_Load(CURSOR_FILENAME))) {
 		printf("SDL ERROR: %s\n", SDL_GetError());
 		exit(1);
 	}
@@ -200,7 +202,6 @@ int main (int argc, char **argv) {
 
 		SDL_BlitSurface(((collectibleBalls[0]).image), NULL, bufferSurface.surface, &((collectibleBalls[0]).frame));
 
-		dispatchBalls(collectibleBalls);
 		moveCursor(&cursor, bufferSurface.surface);
 
 		SDL_BlitSurface(bufferSurface.surface, NULL, screen, &bufferSurface.frame); // Commits all previous blits with a single blit to the screen
