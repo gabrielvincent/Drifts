@@ -48,19 +48,17 @@ void setupCollectibleBalls(Ball *collectibleBalls) {
 
 	int i;
 
-	if (!((collectibleBalls[0]).image = IMG_Load(COLLECTIBLE_BALL_FILENAME))) {
-		printf("SDL ERROR: %s\n", SDL_GetError());
-		exit(1);
-	}
-
-	(collectibleBalls[0]).frame = SDL_RectMake(0, 0, 40, 40);
-	(collectibleBalls[0]).horizontalVelocity = 0;
-	(collectibleBalls[0]).verticallVelocity = 0;
-	(collectibleBalls[0]).visible = NO;
-
 	for (i = 0; i < MAXIMUM_BALLS; i++) {
 
-		printf("Setting up\n");
+		if (!((collectibleBalls[i]).image = IMG_Load(COLLECTIBLE_BALL_FILENAME))) {
+			printf("SDL ERROR: %s\n", SDL_GetError());
+			exit(1);
+		}
+
+		(collectibleBalls[i]).frame = SDL_RectMake(0, 0, 40, 40);
+		(collectibleBalls[i]).horizontalVelocity = 0;
+		(collectibleBalls[i]).verticallVelocity = 0;
+		(collectibleBalls[i]).visible = NO;
 	}
 
 }
@@ -190,8 +188,6 @@ int main (int argc, char **argv) {
 		printf("SDL ERROR: %s\n", SDL_GetError());
 		exit(1);
 	}
-
-	setupCollectibleBalls(collectibleBalls);
 
   while(!quit) {
 		while(SDL_PollEvent(&event)) {
