@@ -8,8 +8,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
+
+typedef struct {
+	SDL_Surface *surface;
+	SDL_Rect frame;
+} BufferSurface;
 
 typedef struct {
 	SDL_Surface *image;
@@ -89,7 +95,7 @@ int surfaceWithFrameDidHitWallAtAxis(SDL_Rect *frame, int axis) {
 	}
 }
 
-void moveCursor(Cursor *cursor, SDL_Surface *screen) {
+void moveCursor(Cursor *cursor, SDL_Surface *bufferSurface) {
 
 	Sint16 *x = &cursor->frame.x;
 	Sint16 *y = &cursor->frame.y;
@@ -107,7 +113,7 @@ void moveCursor(Cursor *cursor, SDL_Surface *screen) {
 	if (surfaceWithFrameDidHitWallAtAxis(&cursor->frame, Y_AXIS))
 		*y = SCREEN_HEIGHT - cursorHeight;
 
-	SDL_BlitSurface(cursor->image, NULL, screen, &cursor->frame);
+	SDL_BlitSurface(cursor->image, NULL, bufferSurface, &cursor->frame);
 }
 
 int main (int argc, char **argv) {
@@ -115,6 +121,7 @@ int main (int argc, char **argv) {
 	srand(time(NULL));
 
 	SDL_Surface *screen;
+	BufferSurface bufferSurface;
 	SDL_Event event;
 	Uint32 backgroundColour;
 	int quit = 0;
@@ -130,6 +137,9 @@ int main (int argc, char **argv) {
 	backgroundColour = SDL_MapRGB(screen->format, 255, 255, 255); // White colour
 	SDL_ShowCursor(SDL_DISABLE);
 
+	bufferSurface.surface = screen;
+	bufferSurface.frame = SDL_RectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
 	cursor.frame = SDL_RectMake(0, 0, 40, 40);
 	if (!(cursor.image = IMG_Load(COLLECTIBLE_BALL_FILENAME))) {
 		printf("SDL ERROR: %s\n", SDL_GetError());
@@ -142,10 +152,12 @@ int main (int argc, char **argv) {
 				quit = 1;
 		}
 
+		SDL_FillRect(bufferSurface.surface, NULL, backgroundColour);
 		SDL_FillRect(screen, NULL, backgroundColour);
 
-		moveCursor(&cursor, screen);
+		moveCursor(&cursor, bufferSurface.surface);
 
+		SDL_BlitSurface(bufferSurface.surface, NULL, screen, &bufferSurface.frame);
 		SDL_Flip(screen);
 	}
 
