@@ -44,7 +44,7 @@ typedef struct {
 	SDL_Rect frame;
 } Cursor;
 
-float lastDispatchedInterval = 0.0;
+float lastDispatchedTicks = 0.0;
 
 #pragma mark - Setups
 
@@ -70,16 +70,16 @@ void setupCollectibleBalls(Ball *collectibleBalls) {
 
 void dispatchBalls(Ball *collectibleBalls) {
     
-    if (lastDispatchedInterval >= BALLS_DISPATCH_INTERVAL) {
-        
-        printf("\nLast dispatched: %.2f", lastDispatchedInterval);
-        
-        lastDispatchedInterval = 0.0;
-        
-        return;
-    }
-    else
-        lastDispatchedInterval = SDL_GetTicks();
+	float lastDispatchedInterval = SDL_GetTicks()	- lastDispatchedTicks;
+
+  if (lastDispatchedInterval >= BALLS_DISPATCH_INTERVAL) {
+    
+    
+ 		
+   	lastDispatchedTicks = SDL_GetTicks(); 
+
+    return;
+  }
 }
 
 void changeDirection(Ball *ball, int axis) {
