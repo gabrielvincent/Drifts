@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:BlueBall.png">
+   </FileRef>
+   <FileRef
+      location = "group:CollectibleBall.png">
+   </FileRef>
+   <FileRef
+      location = "group:Cursor.png">
+   </FileRef>
+   <FileRef
+      location = "group:DestructorBall.png">
+   </FileRef>
+   <FileRef
+      location = "group:main.c">
+   </FileRef>
+   <FileRef
+      location = "group:Makefile">
+   </FileRef>
+   <FileRef
+      location = "group:README.md">
+   </FileRef>
+   <FileRef
+      location = "group:Rules.txt">
+   </FileRef>
+</Workspace>

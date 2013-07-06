@@ -1,7 +1,8 @@
 #define COLLECTIBLE_BALL_FILENAME "CollectibleBall.png"
 #define CURSOR_FILENAME "Cursor.png"
 
-#define MAXIMUM_BALLS 100
+#define BALLS_DISPATCH_INTERVAL 3000.0
+#define MAXIMUM_BALLS 151
 
 #define SCREEN_WIDTH  640
 #define SCREEN_HEIGHT 480
@@ -43,6 +44,8 @@ typedef struct {
 	SDL_Rect frame;
 } Cursor;
 
+float lastDispatchedInterval = 0.0;
+
 #pragma mark - Setups
 
 void setupCollectibleBalls(Ball *collectibleBalls) {
@@ -57,13 +60,27 @@ void setupCollectibleBalls(Ball *collectibleBalls) {
 		}
 
 		(collectibleBalls[i]).frame = SDL_RectMake(0, 0, 40, 40);
-		(collectibleBalls[i]).horizontalVelocity = 0;
-		(collectibleBalls[i]).verticallVelocity = 0;
+		(collectibleBalls[i]).horizontalVelocity = ((float)rand() / (float)RAND_MAX) + (1 + rand() % 5);
+		(collectibleBalls[i]).verticallVelocity = ((float)rand() / (float)RAND_MAX) + (1 + rand() % 5);
 		(collectibleBalls[i]).visible = NO;
 	}
 }
 
 #pragma mark - Implementation
+
+void dispatchBalls(Ball *collectibleBalls) {
+    
+    if (lastDispatchedInterval >= BALLS_DISPATCH_INTERVAL) {
+        
+        printf("\nLast dispatched: %.2f", lastDispatchedInterval);
+        
+        lastDispatchedInterval = 0.0;
+        
+        return;
+    }
+    else
+        lastDispatchedInterval = SDL_GetTicks();
+}
 
 void changeDirection(Ball *ball, int axis) {
 
@@ -153,10 +170,6 @@ void moveCursor(Cursor *cursor, SDL_Surface *bufferSurface) {
 	SDL_BlitSurface(cursor->image, NULL, bufferSurface, &cursor->frame);
 }
 
-void dispatchBalls(Ball *collectibleBalls) {
-
-}
-
 int main (int argc, char **argv) {
 
 	srand(time(NULL));
@@ -201,7 +214,8 @@ int main (int argc, char **argv) {
 		SDL_FillRect(screen, NULL, backgroundColour);
 
 		SDL_BlitSurface(((collectibleBalls[0]).image), NULL, bufferSurface.surface, &((collectibleBalls[0]).frame));
-
+      
+        dispatchBalls(collectibleBalls);
 		moveCursor(&cursor, bufferSurface.surface);
 
 		SDL_BlitSurface(bufferSurface.surface, NULL, screen, &bufferSurface.frame); // Commits all previous blits with a single blit to the screen
