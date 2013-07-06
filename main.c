@@ -19,10 +19,6 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 
-#pragma mark - Prototypes
-
-SDL_Rect SDL_RectMake(Sint16 x, Sint16 y, Uint16 w, Uint16 h);
-
 #pragma mark - Typedefs
 
 typedef char BOOL;
@@ -46,6 +42,11 @@ typedef struct {
 
 float lastDispatchedTicks = 0.0;
 
+#pragma mark - Prototypes
+
+SDL_Rect SDL_RectMake(Sint16 x, Sint16 y, Uint16 w, Uint16 h);
+void moveBall(Ball *ball);
+
 #pragma mark - Setups
 
 void setupCollectibleBalls(Ball *collectibleBalls) {
@@ -59,27 +60,52 @@ void setupCollectibleBalls(Ball *collectibleBalls) {
 			exit(1);
 		}
 
-		(collectibleBalls[i]).frame = SDL_RectMake(0, 0, 40, 40);
-		(collectibleBalls[i]).horizontalVelocity = ((float)rand() / (float)RAND_MAX) + (1 + rand() % 5);
-		(collectibleBalls[i]).verticallVelocity = ((float)rand() / (float)RAND_MAX) + (1 + rand() % 5);
+		float randomOriginX = -((float)rand() / (float)RAND_MAX) + (1 + rand() % (SCREEN_WIDTH/2));
+		float randomOriginY = -((float)rand() / (float)RAND_MAX) + (1 + rand() % 20 * i);
+
+		(collectibleBalls[i]).frame = SDL_RectMake(randomOriginX, randomOriginY, 40, 40);
+		(collectibleBalls[i]).horizontalVelocity = ((float)rand() / (float)RAND_MAX) + (1 + rand() % 2);
+		(collectibleBalls[i]).verticallVelocity = ((float)rand() / (float)RAND_MAX) + (1 + rand() % 2);
 		(collectibleBalls[i]).visible = NO;
+
+		if ((rand() % 1) % 2)
+			(collectibleBalls[i]).horizontalVelocity *= -1;
 	}
 }
 
 #pragma mark - Implementation
 
-void dispatchBalls(Ball *collectibleBalls) {
+void dispatchBalls(Ball *collectibleBalls, SDL_Surface *bufferSurface) {
     
 	float lastDispatchedInterval = SDL_GetTicks()	- lastDispatchedTicks;
 
+	int i = 0;
+	int j = 0;
+
   if (lastDispatchedInterval >= BALLS_DISPATCH_INTERVAL) {
-    
-    
+
+    while (j < 3) {
+
+    	if (!(collectibleBalls[i]).visible) {
+
+    		(collectibleBalls[i]).visible = YES;
+    		SDL_BlitSurface(((collectibleBalls[i]).image), NULL, bufferSurface, &((collectibleBalls[i]).frame));
+    		j++;
+    	}
+
+    	i++;
+    }
  		
    	lastDispatchedTicks = SDL_GetTicks(); 
 
     return;
   }
+
+  for (i = 0; i < MAXIMUM_BALLS; i++)
+  	if ((collectibleBalls[i]).visible) {
+  		moveBall(&collectibleBalls[i]);
+  		SDL_BlitSurface(((collectibleBalls[i]).image), NULL, bufferSurface, &((collectibleBalls[i]).frame));
+  	}
 }
 
 void changeDirection(Ball *ball, int axis) {
@@ -101,10 +127,19 @@ void moveBall(Ball *ball) {
 	ball->frame.x += ball->horizontalVelocity;
 	ball->frame.y += ball->verticallVelocity;
 
-	if (ball->frame.x >= (SCREEN_WIDTH - ball->frame.w) || ball->frame.x <= 0)
-		changeDirection(ball, X_AXIS);
-	if (ball->frame.y >= (SCREEN_HEIGHT - ball->frame.h) || ball->frame.y <= 0)
-		changeDirection(ball, Y_AXIS);
+	if (ball->frame.x >= SCREEN_WIDTH || ball->frame.x <= -ball->frame.w || ball->frame.y >= SCREEN_HEIGHT) {
+
+		float randomOriginX = ((float)rand() / (float)RAND_MAX) + (1 + rand() % (SCREEN_WIDTH/2));
+		float randomOriginY = -((float)rand() / (float)RAND_MAX) + (1 + rand() % 20);
+
+		ball->frame = SDL_RectMake(randomOriginX, randomOriginY, 40, 40);
+		ball->horizontalVelocity = ((float)rand() / (float)RAND_MAX) + (1 + rand() % 2);
+		ball->verticallVelocity = ((float)rand() / (float)RAND_MAX) + (1 + rand() % 2);
+		ball->visible = NO;
+
+		if ((rand() % 2) % 2)
+			ball->horizontalVelocity *= -1;
+	}
 }
 
 SDL_Color SDL_ColorMake(Uint8 red, Uint8 green, Uint8 blue) {
@@ -211,12 +246,9 @@ int main (int argc, char **argv) {
 		}
 
 		SDL_FillRect(bufferSurface.surface, NULL, backgroundColour);
-		SDL_FillRect(screen, NULL, backgroundColour);
-
-		SDL_BlitSurface(((collectibleBalls[0]).image), NULL, bufferSurface.surface, &((collectibleBalls[0]).frame));
       
-        dispatchBalls(collectibleBalls);
 		moveCursor(&cursor, bufferSurface.surface);
+		dispatchBalls(collectibleBalls, bufferSurface.surface);
 
 		SDL_BlitSurface(bufferSurface.surface, NULL, screen, &bufferSurface.frame); // Commits all previous blits with a single blit to the screen
 		SDL_Flip(screen);
