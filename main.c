@@ -1,7 +1,7 @@
 #define COLLECTIBLE_BALL_FILENAME "CollectibleBall.png"
 #define CURSOR_FILENAME "Cursor.png"
 
-#define BALLS_DISPATCH_INTERVAL 3000.0
+#define BALLS_DISPATCH_INTERVAL 500.0
 #define MAXIMUM_BALLS 151
 
 #define SCREEN_WIDTH  640
@@ -49,6 +49,20 @@ void moveBall(Ball *ball);
 
 #pragma mark - Setups
 
+void setupCollectibleBall(Ball *collectibleBall) {
+
+	float randomOriginX = ((float)rand() / (float)RAND_MAX) + (1 + rand() % (SCREEN_WIDTH/2));
+	float randomOriginY = -((float)rand() / (float)RAND_MAX) + (1 + rand() % 20);
+
+	collectibleBall->frame = SDL_RectMake(randomOriginX, randomOriginY, 40, 40);
+	collectibleBall->horizontalVelocity = ((float)rand() / (float)RAND_MAX) + (1 + rand() % 2);
+	collectibleBall->verticallVelocity = ((float)rand() / (float)RAND_MAX) + (1 + rand() % 2);
+	collectibleBall->visible = NO;
+
+	if ((rand() % 1) % 2)
+		collectibleBall->horizontalVelocity *= -1;
+}
+
 void setupCollectibleBalls(Ball *collectibleBalls) {
 
 	int i;
@@ -60,16 +74,7 @@ void setupCollectibleBalls(Ball *collectibleBalls) {
 			exit(1);
 		}
 
-		float randomOriginX = -((float)rand() / (float)RAND_MAX) + (1 + rand() % (SCREEN_WIDTH/2));
-		float randomOriginY = -((float)rand() / (float)RAND_MAX) + (1 + rand() % 20 * i);
-
-		(collectibleBalls[i]).frame = SDL_RectMake(randomOriginX, randomOriginY, 40, 40);
-		(collectibleBalls[i]).horizontalVelocity = ((float)rand() / (float)RAND_MAX) + (1 + rand() % 2);
-		(collectibleBalls[i]).verticallVelocity = ((float)rand() / (float)RAND_MAX) + (1 + rand() % 2);
-		(collectibleBalls[i]).visible = NO;
-
-		if ((rand() % 1) % 2)
-			(collectibleBalls[i]).horizontalVelocity *= -1;
+		setupCollectibleBall(&collectibleBalls[i]);
 	}
 }
 
@@ -89,7 +94,6 @@ void dispatchBalls(Ball *collectibleBalls, SDL_Surface *bufferSurface) {
     	if (!(collectibleBalls[i]).visible) {
 
     		(collectibleBalls[i]).visible = YES;
-    		SDL_BlitSurface(((collectibleBalls[i]).image), NULL, bufferSurface, &((collectibleBalls[i]).frame));
     		j++;
     	}
 
@@ -197,11 +201,6 @@ void moveCursor(Cursor *cursor, SDL_Surface *bufferSurface) {
 	cursor->frame.w = cursorWidth;
 	cursor->frame.h = cursorHeight;
 
-	if (surfaceWithFrameDidHitWallAtAxis(&cursor->frame, X_AXIS))
-		*x = SCREEN_WIDTH - cursorWidth;
-	if (surfaceWithFrameDidHitWallAtAxis(&cursor->frame, Y_AXIS))
-		*y = SCREEN_HEIGHT - cursorHeight;
-
 	SDL_BlitSurface(cursor->image, NULL, bufferSurface, &cursor->frame);
 }
 
@@ -244,9 +243,9 @@ int main (int argc, char **argv) {
 			if(event.type == SDL_QUIT)
 				quit = 1;
 		}
-
-		SDL_FillRect(bufferSurface.surface, NULL, backgroundColour);
       
+		SDL_FillRect(bufferSurface.surface, NULL, backgroundColour);
+
 		moveCursor(&cursor, bufferSurface.surface);
 		dispatchBalls(collectibleBalls, bufferSurface.surface);
 
