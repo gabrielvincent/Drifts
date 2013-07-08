@@ -1,11 +1,11 @@
 #define COLLECTIBLE_BALL_FILENAME "CollectibleBall.png"
 #define CURSOR_FILENAME "Cursor.png"
 
-#define BALLS_DISPATCH_INTERVAL 500.0
+#define BALLS_DISPATCH_INTERVAL 3000.0
 #define MAXIMUM_BALLS 151
 
-#define SCREEN_WIDTH  640
-#define SCREEN_HEIGHT 480
+#define SCREEN_WIDTH  640.0
+#define SCREEN_HEIGHT 480.0
 
 #define X_AXIS 0
 #define Y_AXIS 1
@@ -40,6 +40,7 @@ typedef struct {
 	SDL_Rect frame;
 } Cursor;
 
+BufferSurface bufferSurface;
 float lastDispatchedTicks = 0.0;
 
 #pragma mark - Prototypes
@@ -49,18 +50,20 @@ void moveBall(Ball *ball);
 
 #pragma mark - Setups
 
-void setupCollectibleBall(Ball *collectibleBall) {
+void prepareCollectibleBallForReuse(Ball *collectibleBall) {
 
-	float randomOriginX = ((float)rand() / (float)RAND_MAX) + (1 + rand() % (SCREEN_WIDTH/2));
-	float randomOriginY = -((float)rand() / (float)RAND_MAX) + (1 + rand() % 20);
+	float randomOriginX = SCREEN_WIDTH / 2.0;
+	float randomOriginY = -40;
 
 	collectibleBall->frame = SDL_RectMake(randomOriginX, randomOriginY, 40, 40);
-	collectibleBall->horizontalVelocity = ((float)rand() / (float)RAND_MAX) + (1 + rand() % 2);
-	collectibleBall->verticallVelocity = ((float)rand() / (float)RAND_MAX) + (1 + rand() % 2);
+	collectibleBall->horizontalVelocity = rand() % 10;
+	collectibleBall->verticallVelocity = rand() % 2 + 1;
 	collectibleBall->visible = NO;
 
-	if ((rand() % 1) % 2)
+	if (rand() % 2)
 		collectibleBall->horizontalVelocity *= -1;
+
+	printf("\nX: %f | Y: %f | Hor: %f | Ver: %f", randomOriginX, randomOriginY, collectibleBall->horizontalVelocity, collectibleBall->verticallVelocity);
 }
 
 void setupCollectibleBalls(Ball *collectibleBalls) {
@@ -74,7 +77,7 @@ void setupCollectibleBalls(Ball *collectibleBalls) {
 			exit(1);
 		}
 
-		setupCollectibleBall(&collectibleBalls[i]);
+		prepareCollectibleBallForReuse(&collectibleBalls[i]);
 	}
 }
 
@@ -106,10 +109,8 @@ void dispatchBalls(Ball *collectibleBalls, SDL_Surface *bufferSurface) {
   }
 
   for (i = 0; i < MAXIMUM_BALLS; i++)
-  	if ((collectibleBalls[i]).visible) {
+  	if ((collectibleBalls[i]).visible)
   		moveBall(&collectibleBalls[i]);
-  		SDL_BlitSurface(((collectibleBalls[i]).image), NULL, bufferSurface, &((collectibleBalls[i]).frame));
-  	}
 }
 
 void changeDirection(Ball *ball, int axis) {
@@ -131,19 +132,12 @@ void moveBall(Ball *ball) {
 	ball->frame.x += ball->horizontalVelocity;
 	ball->frame.y += ball->verticallVelocity;
 
-	if (ball->frame.x >= SCREEN_WIDTH || ball->frame.x <= -ball->frame.w || ball->frame.y >= SCREEN_HEIGHT) {
+	SDL_Rect temporaryFrame = ball->frame;
 
-		float randomOriginX = ((float)rand() / (float)RAND_MAX) + (1 + rand() % (SCREEN_WIDTH/2));
-		float randomOriginY = -((float)rand() / (float)RAND_MAX) + (1 + rand() % 20);
+	SDL_BlitSurface(ball->image, NULL, bufferSurface.surface, &temporaryFrame);
 
-		ball->frame = SDL_RectMake(randomOriginX, randomOriginY, 40, 40);
-		ball->horizontalVelocity = ((float)rand() / (float)RAND_MAX) + (1 + rand() % 2);
-		ball->verticallVelocity = ((float)rand() / (float)RAND_MAX) + (1 + rand() % 2);
-		ball->visible = NO;
-
-		if ((rand() % 2) % 2)
-			ball->horizontalVelocity *= -1;
-	}
+	if (ball->frame.x >= SCREEN_WIDTH || ball->frame.x <= -ball->frame.w || ball->frame.y >= SCREEN_HEIGHT)
+		prepareCollectibleBallForReuse(ball);
 }
 
 SDL_Color SDL_ColorMake(Uint8 red, Uint8 green, Uint8 blue) {
@@ -209,7 +203,6 @@ int main (int argc, char **argv) {
 	srand(time(NULL));
 
 	SDL_Surface *screen;
-	BufferSurface bufferSurface;
 	SDL_Event event;
 	Uint32 backgroundColour;
 	int quit = 0;
