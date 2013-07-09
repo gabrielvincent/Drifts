@@ -1,7 +1,10 @@
 #define COLLECTIBLE_BALL_FILENAME "CollectibleBall.png"
 #define CURSOR_FILENAME "Cursor.png"
 
-#define BALLS_DISPATCH_INTERVAL 3000.0
+#define MAXIMUM_DISPATCH_INTERVAL_MODULE 3
+#define MAXIMUM_NUMBER_OF_BALLS_DISPATCHED 5
+#define MAXIMUM_HORIZONTAL_VELOCITY 10
+#define MAXIMUM_VERTICAL_VELOCITY 2
 #define MAXIMUM_BALLS 151
 
 #define SCREEN_WIDTH  640.0
@@ -42,6 +45,7 @@ typedef struct {
 
 Buffer buffer;
 float lastDispatchedTicks = 0.0;
+float nextDispatchInterval = 0.0;
 
 #pragma mark - Prototypes
 
@@ -56,8 +60,8 @@ void prepareCollectibleBallForReuse(Ball *collectibleBall) {
 	float randomOriginY = -40;
 
 	collectibleBall->frame = SDL_RectMake(randomOriginX, randomOriginY, 40, 40);
-	collectibleBall->horizontalVelocity = rand() % 10;
-	collectibleBall->verticallVelocity = rand() % 2 + 1;
+	collectibleBall->horizontalVelocity = rand() % MAXIMUM_HORIZONTAL_VELOCITY;
+	collectibleBall->verticallVelocity = 1 + rand() % MAXIMUM_VERTICAL_VELOCITY;
 	collectibleBall->visible = NO;
 
 	if (rand() % 2)
@@ -90,9 +94,11 @@ void dispatchBalls(Ball *collectibleBalls, SDL_Surface *buffer) {
 	int i = 0;
 	int j = 0;
 
-  if (lastDispatchedInterval >= BALLS_DISPATCH_INTERVAL) {
+  if (lastDispatchedInterval >= nextDispatchInterval) {
 
-    while (j < 3) {
+  	int numberOfBallsToAppearEachInterval = 1 + rand() % MAXIMUM_NUMBER_OF_BALLS_DISPATCHED;
+
+    while (j < numberOfBallsToAppearEachInterval) {
 
     	if (!(collectibleBalls[i]).visible) {
 
@@ -104,6 +110,7 @@ void dispatchBalls(Ball *collectibleBalls, SDL_Surface *buffer) {
     }
  		
    	lastDispatchedTicks = SDL_GetTicks(); 
+   	nextDispatchInterval = (1 + rand() % 3) * 1000; // Interval expressed in miliseconds
 
     return;
   }
