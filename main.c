@@ -182,20 +182,16 @@ int surfaceWithFrameDidHitWallAtAxis(SDL_Rect *frame, int axis) {
 	}
 }
 
-void moveCursor(Cursor *cursor, SDL_Surface *bufferSurface) {
+void moveCursor(Cursor *cursor) {
 
-	Sint16 *x = &cursor->frame.x;
-	Sint16 *y = &cursor->frame.y;
+	SDL_Rect temporaryFrame;
 
-	Uint16 cursorWidth = cursor->frame.w;
-	Uint16 cursorHeight = cursor->frame.h;
+	Sint16 *x = &temporaryFrame.x;
+	Sint16 *y = &temporaryFrame.y;
 
-	SDL_GetMouseState((int *)x, (int *)y); 
+	SDL_GetMouseState((int *)x, (int *)y);
 
-	cursor->frame.w = cursorWidth;
-	cursor->frame.h = cursorHeight;
-
-	SDL_BlitSurface(cursor->image, NULL, bufferSurface, &cursor->frame);
+	SDL_BlitSurface(cursor->image, NULL, bufferSurface.surface, &temporaryFrame);
 }
 
 int main (int argc, char **argv) {
@@ -239,7 +235,7 @@ int main (int argc, char **argv) {
       
 		SDL_FillRect(bufferSurface.surface, NULL, backgroundColour);
 
-		moveCursor(&cursor, bufferSurface.surface);
+		moveCursor(&cursor);
 		dispatchBalls(collectibleBalls, bufferSurface.surface);
 
 		SDL_BlitSurface(bufferSurface.surface, NULL, screen, &bufferSurface.frame); // Commits all previous blits with a single blit to the screen
