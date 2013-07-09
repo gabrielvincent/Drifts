@@ -26,7 +26,7 @@ typedef char BOOL;
 typedef struct {
 	SDL_Surface *surface;
 	SDL_Rect frame;
-} BufferSurface;
+} Buffer;
 
 typedef struct {
 	SDL_Surface *image;
@@ -40,7 +40,7 @@ typedef struct {
 	SDL_Rect frame;
 } Cursor;
 
-BufferSurface bufferSurface;
+Buffer buffer;
 float lastDispatchedTicks = 0.0;
 
 #pragma mark - Prototypes
@@ -83,7 +83,7 @@ void setupCollectibleBalls(Ball *collectibleBalls) {
 
 #pragma mark - Implementation
 
-void dispatchBalls(Ball *collectibleBalls, SDL_Surface *bufferSurface) {
+void dispatchBalls(Ball *collectibleBalls, SDL_Surface *buffer) {
     
 	float lastDispatchedInterval = SDL_GetTicks()	- lastDispatchedTicks;
 
@@ -113,6 +113,20 @@ void dispatchBalls(Ball *collectibleBalls, SDL_Surface *bufferSurface) {
   		moveBall(&collectibleBalls[i]);
 }
 
+void moveBall(Ball *ball) {
+
+	ball->frame.x += ball->horizontalVelocity;
+	ball->frame.y += ball->verticallVelocity;
+
+	SDL_Rect temporaryFrame = ball->frame;
+
+	if (ball->frame.x >= SCREEN_WIDTH || ball->frame.x <= -ball->frame.w || ball->frame.y >= SCREEN_HEIGHT)
+		prepareCollectibleBallForReuse(ball);
+
+	SDL_BlitSurface(ball->image, NULL, buffer.surface, &temporaryFrame);
+}
+
+/*
 void changeDirection(Ball *ball, int axis) {
 
 	switch (axis) {
@@ -126,19 +140,7 @@ void changeDirection(Ball *ball, int axis) {
 			break;
 	}
 }
-
-void moveBall(Ball *ball) {
-
-	ball->frame.x += ball->horizontalVelocity;
-	ball->frame.y += ball->verticallVelocity;
-
-	SDL_Rect temporaryFrame = ball->frame;
-
-	SDL_BlitSurface(ball->image, NULL, bufferSurface.surface, &temporaryFrame);
-
-	if (ball->frame.x >= SCREEN_WIDTH || ball->frame.x <= -ball->frame.w || ball->frame.y >= SCREEN_HEIGHT)
-		prepareCollectibleBallForReuse(ball);
-}
+*/
 
 SDL_Color SDL_ColorMake(Uint8 red, Uint8 green, Uint8 blue) {
 
@@ -184,14 +186,15 @@ int surfaceWithFrameDidHitWallAtAxis(SDL_Rect *frame, int axis) {
 
 void moveCursor(Cursor *cursor) {
 
-	SDL_Rect temporaryFrame;
+	int x;
+	int y;
 
-	Sint16 *x = &temporaryFrame.x;
-	Sint16 *y = &temporaryFrame.y;
+	SDL_GetMouseState(&x, &y);
 
-	SDL_GetMouseState((int *)x, (int *)y);
+	cursor->frame.x = x;
+	cursor->frame.y = y;
 
-	SDL_BlitSurface(cursor->image, NULL, bufferSurface.surface, &temporaryFrame);
+	SDL_BlitSurface(cursor->image, NULL, buffer.surface, &cursor->frame);
 }
 
 int main (int argc, char **argv) {
@@ -216,8 +219,8 @@ int main (int argc, char **argv) {
 	backgroundColour = SDL_MapRGB(screen->format, 255, 255, 255); // White colour
 	SDL_ShowCursor(SDL_DISABLE);
 
-	bufferSurface.surface = screen;
-	bufferSurface.frame = SDL_RectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+	buffer.surface = screen;
+	buffer.frame = SDL_RectMake(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	setupCollectibleBalls(collectibleBalls);
 
@@ -232,13 +235,13 @@ int main (int argc, char **argv) {
 			if(event.type == SDL_QUIT)
 				quit = 1;
 		}
-      
-		SDL_FillRect(bufferSurface.surface, NULL, backgroundColour);
+    
+		SDL_FillRect(buffer.surface, NULL, backgroundColour);
 
 		moveCursor(&cursor);
-		dispatchBalls(collectibleBalls, bufferSurface.surface);
+		dispatchBalls(collectibleBalls, buffer.surface);
 
-		SDL_BlitSurface(bufferSurface.surface, NULL, screen, &bufferSurface.frame); // Commits all previous blits with a single blit to the screen
+		SDL_BlitSurface(buffer.surface, NULL, screen, &buffer.frame); // Commits all previous blits with a single blit to the screen
 		SDL_Flip(screen);
 	}
 
