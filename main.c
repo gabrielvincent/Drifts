@@ -43,6 +43,7 @@ typedef struct {
 	SDL_Rect frame;
 } Cursor;
 
+Cursor cursor;
 Buffer buffer;
 float lastDispatchedTicks = 0.0;
 float nextDispatchInterval = 0.0;
@@ -67,7 +68,7 @@ void prepareCollectibleBallForReuse(Ball *collectibleBall) {
 	if (rand() % 2)
 		collectibleBall->horizontalVelocity *= -1;
 
-	printf("\nX: %f | Y: %f | Hor: %f | Ver: %f", randomOriginX, randomOriginY, collectibleBall->horizontalVelocity, collectibleBall->verticallVelocity);
+	// printf("\nX: %f | Y: %f | Hor: %f | Ver: %f", randomOriginX, randomOriginY, collectibleBall->horizontalVelocity, collectibleBall->verticallVelocity);
 }
 
 void setupCollectibleBalls(Ball *collectibleBalls) {
@@ -191,17 +192,17 @@ int surfaceWithFrameDidHitWallAtAxis(SDL_Rect *frame, int axis) {
 	}
 }
 
-void moveCursor(Cursor *cursor) {
+void moveCursor() {
 
 	int x;
 	int y;
 
 	SDL_GetMouseState(&x, &y);
 
-	cursor->frame.x = x;
-	cursor->frame.y = y;
+	cursor.frame.x = x;
+	cursor.frame.y = y;
 
-	SDL_BlitSurface(cursor->image, NULL, buffer.surface, &cursor->frame);
+	SDL_BlitSurface(cursor.image, NULL, buffer.surface, &cursor.frame);
 }
 
 int main (int argc, char **argv) {
@@ -212,8 +213,6 @@ int main (int argc, char **argv) {
 	SDL_Event event;
 	Uint32 backgroundColour;
 	int quit = 0;
-
-	Cursor cursor;
 
 	Ball collectibleBalls[MAXIMUM_BALLS];
 
@@ -231,7 +230,7 @@ int main (int argc, char **argv) {
 
 	setupCollectibleBalls(collectibleBalls);
 
-	cursor.frame = SDL_RectMake(0, 0, 40, 40);
+	cursor.frame = SDL_RectMake(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, 40, 40);
 	if (!(cursor.image = IMG_Load(CURSOR_FILENAME))) {
 		printf("SDL ERROR: %s\n", SDL_GetError());
 		exit(1);
@@ -239,17 +238,26 @@ int main (int argc, char **argv) {
 
   while(!quit) {
 		while(SDL_PollEvent(&event)) {
-			if(event.type == SDL_QUIT)
-				quit = 1;
+			switch(event.type) {
+				case SDL_QUIT:
+					quit = 1;
+					break;
+
+				default:
+					break;
+			}
 		}
-    
-		SDL_FillRect(buffer.surface, NULL, backgroundColour);
 
-		moveCursor(&cursor);
-		dispatchBalls(collectibleBalls, buffer.surface);
+		if (SDL_GetTicks() % 24 == 0) {
 
-		SDL_BlitSurface(buffer.surface, NULL, screen, &buffer.frame); // Commits all previous blits with a single blit to the screen
-		SDL_Flip(screen);
+			SDL_FillRect(buffer.surface, NULL, backgroundColour);
+
+			moveCursor();
+			dispatchBalls(collectibleBalls, buffer.surface);
+
+			SDL_BlitSurface(buffer.surface, NULL, screen, &buffer.frame); // Commits all previous blits with a single blit to the screen
+			SDL_Flip(screen);
+		}
 	}
 
 	SDL_Quit();
