@@ -1,6 +1,7 @@
 #define COLLECTIBLE_BALL_FILENAME "CollectibleBall.png"
 #define CURSOR_FILENAME "Cursor.png"
 
+#define MAXIMUM_FPS 24
 #define MAXIMUM_DISPATCH_INTERVAL_MODULE 3
 #define MAXIMUM_NUMBER_OF_BALLS_DISPATCHED 5
 #define MAXIMUM_HORIZONTAL_VELOCITY 10
@@ -248,7 +249,7 @@ int main (int argc, char **argv) {
 			}
 		}
 
-		if (SDL_GetTicks() % 24 == 0) {
+		if (SDL_GetTicks() % MAXIMUM_FPS == 0) {
 
 			SDL_FillRect(buffer.surface, NULL, backgroundColour);
 
